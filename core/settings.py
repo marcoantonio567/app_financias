@@ -15,6 +15,10 @@ from pathlib import Path
 
 import dj_database_url
 
+IS_VERCEL = os.environ.get("VERCEL", "").lower() in {"1", "true", "yes", "on"} or bool(
+    os.environ.get("VERCEL_ENV")
+)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -99,10 +103,11 @@ if DATABASE_URL:
         )
     }
 else:
+    sqlite_name = "/tmp/db.sqlite3" if IS_VERCEL else (BASE_DIR / "db.sqlite3")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': sqlite_name,
         }
     }
 
