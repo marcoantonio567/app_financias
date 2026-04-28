@@ -119,3 +119,5 @@ NUMBER_GROUPING = 3
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+FINANCEIRO_APP_PIN = "162636"

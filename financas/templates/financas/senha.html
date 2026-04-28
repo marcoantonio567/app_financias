@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Senha</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: Canvas;
+        color: CanvasText;
+      }
+      .container {
+        max-width: 520px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+      .card {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 16px;
+        background: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 8px 0;
+      }
+      .muted {
+        opacity: 0.85;
+        margin: 0;
+      }
+      label {
+        font-size: 12px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.85;
+      }
+      .field {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 12px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: Canvas;
+        color: CanvasText;
+        font-size: 18px;
+        letter-spacing: 0.18em;
+      }
+      button {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: color-mix(in srgb, CanvasText 10%, Canvas);
+        color: CanvasText;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .errorlist {
+        margin: 10px 0 0 0;
+        padding: 0;
+        list-style: none;
+        color: #b00020;
+      }
+      .row {
+        display: grid;
+        gap: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Digite a senha</h1>
+        <p class="muted">Para acessar o Financeiro, informe a senha de 6 dígitos.</p>
+      </div>
+
+      <div class="card">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="row">
+            <label for="{{ form.pin.id_for_label }}">{{ form.pin.label }}</label>
+            {{ form.pin }}
+            {{ form.pin.errors }}
+          </div>
+
+          <input type="hidden" name="next" value="{{ next }}" />
+
+          {{ form.non_field_errors }}
+
+          <div style="margin-top: 12px">
+            <button type="submit">Entrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
