@@ -99,6 +99,71 @@
         border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
         background: color-mix(in srgb, CanvasText 6%, Canvas);
       }
+      .messages {
+        display: grid;
+        gap: 10px;
+      }
+      .message {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: Canvas;
+      }
+      .message-success {
+        border-color: color-mix(in srgb, #1b7f3a 42%, transparent);
+      }
+      .message-error {
+        border-color: color-mix(in srgb, #b00020 42%, transparent);
+      }
+      .btn {
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        background: color-mix(in srgb, CanvasText 6%, Canvas);
+        color: CanvasText;
+        cursor: pointer;
+      }
+      .btn-danger {
+        border-color: color-mix(in srgb, #b00020 42%, transparent);
+        background: color-mix(in srgb, #b00020 12%, Canvas);
+      }
+      .dialog {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 14px;
+        padding: 16px;
+        background: Canvas;
+        color: CanvasText;
+        max-width: 420px;
+        width: calc(100% - 48px);
+      }
+      .dialog::backdrop {
+        background: rgba(0, 0, 0, 0.45);
+      }
+      .dialog-title {
+        font-size: 16px;
+        font-weight: 650;
+        margin: 0 0 6px 0;
+      }
+      .dialog-subtitle {
+        margin: 0 0 12px 0;
+        opacity: 0.85;
+        font-size: 13px;
+      }
+      .field {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: Canvas;
+        color: CanvasText;
+      }
+      .dialog-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
     </style>
   </head>
   <body>
@@ -113,6 +178,14 @@
         </div>
       </div>
 
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="message message-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       <div class="card table-wrap">
         <table>
           <thead>
@@ -122,6 +195,7 @@
               <th>Descrição</th>
               <th>Valor</th>
               <th>Criado em</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -132,10 +206,20 @@
                 <td>{{ l.descricao }}</td>
                 <td>R$ {{ l.valor|localize }}</td>
                 <td class="muted">{{ l.criado_em }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-danger js-delete"
+                    data-pk="{{ l.pk }}"
+                    data-resumo="{{ l.data }} · {{ l.get_tipo_display }} · {{ l.descricao }} · R$ {{ l.valor|localize }}"
+                  >
+                    Excluir
+                  </button>
+                </td>
               </tr>
             {% empty %}
               <tr>
-                <td colspan="5">Nenhuma transação cadastrada ainda.</td>
+                <td colspan="6">Nenhuma transação cadastrada ainda.</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -158,5 +242,76 @@
         </div>
       </div>
     </div>
+
+    <dialog id="deleteDialog" class="dialog">
+      <h2 class="dialog-title">Excluir transação</h2>
+      <p class="dialog-subtitle" id="deleteResumo"></p>
+      <form method="post" id="deleteForm" data-action-template="{% url 'financas:excluir_lancamento' 0 %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" id="deleteNext" value="" />
+        <label for="deletePin" class="muted" style="display:block; margin-bottom:6px">Confirme com a senha (PIN)</label>
+        <input
+          id="deletePin"
+          name="pin"
+          class="field"
+          type="password"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          pattern="\d{6}"
+          minlength="6"
+          maxlength="6"
+          required
+          placeholder="••••••"
+        />
+        <div class="dialog-actions">
+          <button type="button" class="btn" id="cancelDelete">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Excluir</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+      (function () {
+        const dialog = document.getElementById("deleteDialog");
+        const resumo = document.getElementById("deleteResumo");
+        const form = document.getElementById("deleteForm");
+        const nextInput = document.getElementById("deleteNext");
+        const pinInput = document.getElementById("deletePin");
+        const cancelBtn = document.getElementById("cancelDelete");
+
+        function currentUrl() {
+          return window.location.pathname + window.location.search;
+        }
+
+        function setActionForPk(pk) {
+          const template = form.dataset.actionTemplate;
+          form.action = template.replace("0/", pk + "/");
+        }
+
+        document.querySelectorAll(".js-delete").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const pk = btn.getAttribute("data-pk");
+            const texto = btn.getAttribute("data-resumo") || "";
+            resumo.textContent = texto;
+            setActionForPk(pk);
+            nextInput.value = currentUrl();
+            pinInput.value = "";
+            if (dialog && typeof dialog.showModal === "function") {
+              dialog.showModal();
+              pinInput.focus();
+              return;
+            }
+            const pin = window.prompt("Confirme a senha (6 dígitos) para excluir:") || "";
+            if (!pin) return;
+            pinInput.value = pin;
+            form.submit();
+          });
+        });
+
+        cancelBtn.addEventListener("click", () => {
+          if (dialog && typeof dialog.close === "function") dialog.close();
+        });
+      })();
+    </script>
   </body>
 </html>

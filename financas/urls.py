@@ -8,6 +8,11 @@ urlpatterns = [
     path("", views.lancamentos_view, name="lancamentos"),
     path("lancamentos/", views.lancamentos_view, name="lancamentos"),
     path("historico/", views.historico_view, name="historico"),
+    path(
+        "historico/excluir/<int:pk>/",
+        views.excluir_lancamento_view,
+        name="excluir_lancamento",
+    ),
     path("dashboard/", views.dashboard_view, name="dashboard"),
     path("senha/", views.senha_view, name="senha"),
 ]

@@ -5,11 +5,13 @@ from urllib.parse import urlencode
 
 from django.db.models import DecimalField, Sum, Value
 from django.db.models.functions import Coalesce
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from financas.forms import LancamentoForm, PinForm
 from financas.models import Lancamento
@@ -196,6 +198,43 @@ def historico_view(request):
             "page_obj": page_obj,
         },
     )
+
+
+@require_POST
+def excluir_lancamento_view(request, pk: int):
+    next_url = request.POST.get("next") or ""
+    if not request.session.get("pin_ok"):
+        redirect_to = next_url
+        if not (
+            redirect_to
+            and url_has_allowed_host_and_scheme(
+                redirect_to,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            )
+        ):
+            redirect_to = reverse("financas:historico")
+        url = reverse("financas:senha")
+        return redirect(f"{url}?{urlencode({'next': redirect_to})}")
+
+    form = PinForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Senha incorreta. Transação não excluída.")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
+            return redirect(next_url)
+        return redirect("financas:historico")
+
+    lancamento = get_object_or_404(Lancamento, pk=pk)
+    lancamento.delete()
+    messages.success(request, "Transação excluída com sucesso.")
+
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(next_url)
+    return redirect("financas:historico")
 
 
 def senha_view(request):
