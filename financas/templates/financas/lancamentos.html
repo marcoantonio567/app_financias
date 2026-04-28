@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entradas e Saídas</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: Canvas;
+        color: CanvasText;
+      }
+      .container {
+        max-width: 920px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+      .card {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 16px;
+        background: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 12px 0;
+      }
+      .grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .field {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: Canvas;
+        color: CanvasText;
+      }
+      label {
+        font-size: 12px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.85;
+      }
+      .row {
+        display: grid;
+        gap: 6px;
+        min-width: 0;
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: space-between;
+        margin-top: 12px;
+      }
+      button {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: color-mix(in srgb, CanvasText 10%, Canvas);
+        color: CanvasText;
+        cursor: pointer;
+      }
+      a {
+        color: inherit;
+      }
+      .summary {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .kpi {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 12px;
+        background: Canvas;
+      }
+      .kpi-title {
+        font-size: 12px;
+        opacity: 0.85;
+      }
+      .kpi-value {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 4px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+        vertical-align: top;
+      }
+      th {
+        font-size: 12px;
+        opacity: 0.85;
+        font-weight: 600;
+      }
+      .errorlist {
+        margin: 8px 0 0 0;
+        padding: 0;
+        list-style: none;
+        color: #b00020;
+      }
+      .topbar {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .tab {
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        background: color-mix(in srgb, CanvasText 6%, Canvas);
+      }
+      .tab-active {
+        background: color-mix(in srgb, CanvasText 14%, Canvas);
+        font-weight: 600;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        min-width: 520px;
+      }
+      @media (max-width: 720px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .summary {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    {% load l10n %}
+    <div class="container">
+      <div class="topbar">
+        <h1>Cadastro de Entradas e Saídas</h1>
+        <div class="tabs">
+          <a class="tab tab-active" href="/">Cadastro</a>
+          <a class="tab" href="/historico/">Histórico</a>
+          <a class="tab" href="/admin/">Admin</a>
+        </div>
+      </div>
+
+      <div class="card summary">
+        <div class="kpi">
+          <div class="kpi-title">Entradas</div>
+          <div class="kpi-value">R$ {{ total_entradas|localize }}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Saídas</div>
+          <div class="kpi-value">R$ {{ total_saidas|localize }}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Saldo</div>
+          <div class="kpi-value">R$ {{ saldo|localize }}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="grid">
+            <div class="row">
+              <label for="{{ form.tipo.id_for_label }}">Tipo</label>
+              {{ form.tipo }}
+              {{ form.tipo.errors }}
+            </div>
+            <div class="row">
+              <label for="{{ form.data.id_for_label }}">Data</label>
+              {{ form.data }}
+              {{ form.data.errors }}
+            </div>
+            <div class="row" style="grid-column: 1 / -1">
+              <label for="{{ form.descricao.id_for_label }}">Descrição</label>
+              {{ form.descricao }}
+              {{ form.descricao.errors }}
+            </div>
+            <div class="row">
+              <label for="{{ form.valor.id_for_label }}">Valor</label>
+              {{ form.valor }}
+              {{ form.valor.errors }}
+            </div>
+          </div>
+
+          {{ form.non_field_errors }}
+
+          <div class="actions">
+            <button type="submit">Salvar</button>
+            <span>Os 20 últimos lançamentos aparecem abaixo.</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in ultimos %}
+              <tr>
+                <td>{{ l.data }}</td>
+                <td>{{ l.get_tipo_display }}</td>
+                <td>{{ l.descricao }}</td>
+                <td>R$ {{ l.valor|localize }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4">Nenhum lançamento cadastrado ainda.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

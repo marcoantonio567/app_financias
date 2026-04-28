@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Histórico</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: Canvas;
+        color: CanvasText;
+      }
+      .container {
+        max-width: 920px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+      .card {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 16px;
+        background: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      a {
+        color: inherit;
+      }
+      .topbar {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .tab {
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        background: color-mix(in srgb, CanvasText 6%, Canvas);
+      }
+      .tab-active {
+        background: color-mix(in srgb, CanvasText 14%, Canvas);
+        font-weight: 600;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        min-width: 620px;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+        vertical-align: top;
+      }
+      th {
+        font-size: 12px;
+        opacity: 0.85;
+        font-weight: 600;
+      }
+      .muted {
+        opacity: 0.85;
+      }
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .pager {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .pager a {
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        background: color-mix(in srgb, CanvasText 6%, Canvas);
+      }
+    </style>
+  </head>
+  <body>
+    {% load l10n %}
+    <div class="container">
+      <div class="topbar">
+        <h1>Histórico de Transações</h1>
+        <div class="tabs">
+          <a class="tab" href="/">Cadastro</a>
+          <a class="tab tab-active" href="/historico/">Histórico</a>
+          <a class="tab" href="/admin/">Admin</a>
+        </div>
+      </div>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Valor</th>
+              <th>Criado em</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in page_obj %}
+              <tr>
+                <td>{{ l.data }}</td>
+                <td>{{ l.get_tipo_display }}</td>
+                <td>{{ l.descricao }}</td>
+                <td>R$ {{ l.valor|localize }}</td>
+                <td class="muted">{{ l.criado_em }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5">Nenhuma transação cadastrada ainda.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card pagination">
+        <div class="muted">
+          Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        </div>
+        <div class="pager">
+          {% if page_obj.has_previous %}
+            <a href="?page=1">Primeira</a>
+            <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+          {% endif %}
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Próxima</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
