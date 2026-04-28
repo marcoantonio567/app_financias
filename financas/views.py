@@ -1,3 +1,5 @@
+import json
+from datetime import date, timedelta
 from decimal import Decimal
 from urllib.parse import urlencode
 
@@ -5,6 +7,7 @@ from django.db.models import DecimalField, Sum, Value
 from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.shortcuts import redirect, render
 
@@ -64,6 +67,115 @@ def lancamentos_view(request):
             "total_entradas": total_entradas,
             "total_saidas": total_saidas,
             "saldo": saldo,
+        },
+    )
+
+
+def _parse_month_param(value: str | None) -> date | None:
+    if not value:
+        return None
+    try:
+        year_text, month_text = value.split("-")
+        year = int(year_text)
+        month = int(month_text)
+        if 1 <= month <= 12:
+            return date(year, month, 1)
+    except (ValueError, TypeError):
+        return None
+    return None
+
+
+def _month_end(day: date) -> date:
+    if day.month == 12:
+        next_month = date(day.year + 1, 1, 1)
+    else:
+        next_month = date(day.year, day.month + 1, 1)
+    return next_month - timedelta(days=1)
+
+
+def dashboard_view(request):
+    if not request.session.get("pin_ok"):
+        return _pin_redirect(request)
+
+    month_param = request.GET.get("mes")
+    month_start = _parse_month_param(month_param)
+    if month_start:
+        end_date = _month_end(month_start)
+    else:
+        end_date = timezone.localdate()
+    start_date = end_date - timedelta(days=29)
+
+    qs = Lancamento.objects.filter(data__range=(start_date, end_date))
+
+    total_output_field = DecimalField(max_digits=12, decimal_places=2)
+    total_entradas = (
+        qs.filter(tipo=Lancamento.Tipo.ENTRADA).aggregate(
+            total=Coalesce(
+                Sum("valor"),
+                Value(0, output_field=total_output_field),
+                output_field=total_output_field,
+            )
+        )["total"]
+    )
+    total_saidas = (
+        qs.filter(tipo=Lancamento.Tipo.SAIDA).aggregate(
+            total=Coalesce(
+                Sum("valor"),
+                Value(0, output_field=total_output_field),
+                output_field=total_output_field,
+            )
+        )["total"]
+    )
+    total_entradas = total_entradas.quantize(Decimal("0.01"))
+    total_saidas = total_saidas.quantize(Decimal("0.01"))
+    saldo = (total_entradas - total_saidas).quantize(Decimal("0.01"))
+
+    days = [start_date + timedelta(days=offset) for offset in range(30)]
+    entradas_por_dia = {day: Decimal("0.00") for day in days}
+    saidas_por_dia = {day: Decimal("0.00") for day in days}
+
+    for row in qs.values("data", "tipo").annotate(total=Sum("valor")).order_by("data"):
+        day = row["data"]
+        if day not in entradas_por_dia:
+            continue
+        if row["tipo"] == Lancamento.Tipo.ENTRADA:
+            entradas_por_dia[day] = row["total"] or Decimal("0.00")
+        else:
+            saidas_por_dia[day] = row["total"] or Decimal("0.00")
+
+    labels = [day.strftime("%d/%m") for day in days]
+    entradas_series = [float(entradas_por_dia[day]) for day in days]
+    saidas_series = [float(saidas_por_dia[day]) for day in days]
+    saldo_series = [float(entradas_por_dia[day] - saidas_por_dia[day]) for day in days]
+
+    month_options = []
+    cursor = date(end_date.year, end_date.month, 1)
+    for _ in range(12):
+        month_options.append(
+            {
+                "value": cursor.strftime("%Y-%m"),
+                "label": cursor.strftime("%m/%Y"),
+            }
+        )
+        cursor = (cursor - timedelta(days=1)).replace(day=1)
+
+    selected_month = month_start.strftime("%Y-%m") if month_start else ""
+
+    return render(
+        request,
+        "financas/dashboard.html",
+        {
+            "total_entradas": total_entradas,
+            "total_saidas": total_saidas,
+            "saldo": saldo,
+            "labels_json": json.dumps(labels),
+            "entradas_json": json.dumps(entradas_series),
+            "saidas_json": json.dumps(saidas_series),
+            "saldo_json": json.dumps(saldo_series),
+            "start_date": start_date,
+            "end_date": end_date,
+            "month_options": month_options,
+            "selected_month": selected_month,
         },
     )
 

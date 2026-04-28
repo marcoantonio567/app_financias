@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboards</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: Canvas;
+        color: CanvasText;
+      }
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+      .card {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 16px;
+        background: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 8px 0;
+      }
+      a {
+        color: inherit;
+      }
+      .topbar {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .tab {
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        background: color-mix(in srgb, CanvasText 6%, Canvas);
+      }
+      .tab-active {
+        background: color-mix(in srgb, CanvasText 14%, Canvas);
+        font-weight: 600;
+      }
+      .summary {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .kpi {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 12px;
+        background: Canvas;
+      }
+      .kpi-title {
+        font-size: 12px;
+        opacity: 0.85;
+      }
+      .kpi-value {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 4px;
+      }
+      .filters {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .filters label {
+        font-size: 12px;
+        opacity: 0.85;
+      }
+      .filters select {
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: Canvas;
+        color: CanvasText;
+      }
+      button {
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: color-mix(in srgb, CanvasText 10%, Canvas);
+        color: CanvasText;
+        cursor: pointer;
+      }
+      .muted {
+        opacity: 0.85;
+        font-size: 12px;
+      }
+      .chart-wrap {
+        background: Canvas;
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+      }
+      .chart-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      @media (max-width: 900px) {
+        .chart-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 720px) {
+        .summary {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    {% load l10n %}
+    <div class="container">
+      <div class="topbar">
+        <div>
+          <h1>Dashboards - Análise de 30 dias</h1>
+          <div class="muted">Período: {{ start_date }} até {{ end_date }}</div>
+        </div>
+        <div class="tabs">
+          <a class="tab" href="/">Cadastro</a>
+          <a class="tab" href="/historico/">Histórico</a>
+          <a class="tab tab-active" href="/dashboard/">Dashboards</a>
+        </div>
+      </div>
+
+      <div class="card summary">
+        <div class="kpi">
+          <div class="kpi-title">Entradas</div>
+          <div class="kpi-value">R$ {{ total_entradas|localize }}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Saídas</div>
+          <div class="kpi-value">R$ {{ total_saidas|localize }}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Saldo</div>
+          <div class="kpi-value">R$ {{ saldo|localize }}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <form method="get" class="filters">
+          <label for="mes">Mês de referência</label>
+          <select id="mes" name="mes">
+            <option value="">Últimos 30 dias</option>
+            {% for opt in month_options %}
+              <option value="{{ opt.value }}" {% if opt.value == selected_month %}selected{% endif %}>
+                {{ opt.label }}
+              </option>
+            {% endfor %}
+          </select>
+          <button type="submit">Atualizar</button>
+        </form>
+      </div>
+
+      <div class="card chart-grid">
+        <div class="chart-wrap">
+          <canvas id="chartFluxo" height="220"></canvas>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chartSaldo" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+      const labels = {{ labels_json|safe }};
+      const entradas = {{ entradas_json|safe }};
+      const saidas = {{ saidas_json|safe }};
+      const saldo = {{ saldo_json|safe }};
+
+      const gridColor = "color-mix(in srgb, CanvasText 12%, transparent)";
+      const axisColor = "color-mix(in srgb, CanvasText 65%, transparent)";
+
+      new Chart(document.getElementById("chartFluxo"), {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Entradas",
+              data: entradas,
+              borderColor: "#2e7d32",
+              backgroundColor: "rgba(46, 125, 50, 0.15)",
+              tension: 0.3,
+              fill: true,
+            },
+            {
+              label: "Saídas",
+              data: saidas,
+              borderColor: "#c62828",
+              backgroundColor: "rgba(198, 40, 40, 0.15)",
+              tension: 0.3,
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "top",
+            },
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: axisColor },
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: axisColor },
+            },
+          },
+        },
+      });
+
+      new Chart(document.getElementById("chartSaldo"), {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Saldo diário",
+              data: saldo,
+              backgroundColor: "rgba(33, 150, 243, 0.35)",
+              borderColor: "#1e88e5",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "top",
+            },
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: axisColor },
+            },
+            y: {
+              grid: { color: gridColor },
+              ticks: { color: axisColor },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
