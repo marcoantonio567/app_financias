@@ -33,6 +33,7 @@ class Lancamento(models.Model):
     categoria = models.ForeignKey(
         Categoria, on_delete=models.PROTECT, related_name="lancamentos"
     )
+    pessoa = models.ForeignKey(Pessoa, on_delete=models.PROTECT, related_name="lancamentos")
     descricao = models.CharField(max_length=255)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
     data = models.DateField(default=timezone.localdate)

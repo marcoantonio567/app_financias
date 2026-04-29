@@ -59,7 +59,7 @@ def lancamentos_view(request):
     total_saidas = total_saidas.quantize(Decimal("0.01"))
     saldo = (total_entradas - total_saidas).quantize(Decimal("0.01"))
 
-    ultimos = Lancamento.objects.select_related("categoria").all()[:20]
+    ultimos = Lancamento.objects.select_related("categoria", "pessoa").all()[:20]
 
     return render(
         request,
@@ -187,7 +187,7 @@ def historico_view(request):
     if not request.session.get("pin_ok"):
         return _pin_redirect(request)
 
-    qs = Lancamento.objects.select_related("categoria").all()
+    qs = Lancamento.objects.select_related("categoria", "pessoa").all()
     paginator = Paginator(qs, 25)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -259,8 +259,13 @@ def excluir_pessoa_view(request, pk: int):
         return _pin_redirect(request)
 
     pessoa = get_object_or_404(Pessoa, pk=pk)
-    pessoa.delete()
-    messages.success(request, "Pessoa excluída com sucesso.")
+    try:
+        pessoa.delete()
+        messages.success(request, "Pessoa excluída com sucesso.")
+    except ProtectedError:
+        messages.error(
+            request, "Não foi possível excluir: existe lançamento associado a esta pessoa."
+        )
     return redirect("financas:administrativo")
 
 

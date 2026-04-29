@@ -217,6 +217,7 @@
               <th>Data</th>
               <th>Tipo</th>
               <th>Categoria</th>
+              <th>Pessoa</th>
               <th>Descrição</th>
               <th>Valor</th>
               <th>Criado em</th>
@@ -229,6 +230,7 @@
                 <td>{{ l.data }}</td>
                 <td>{{ l.get_tipo_display }}</td>
                 <td>{{ l.categoria }}</td>
+                <td>{{ l.pessoa }}</td>
                 <td>{{ l.descricao }}</td>
                 <td>R$ {{ l.valor|localize }}</td>
                 <td class="muted">{{ l.criado_em }}</td>
@@ -237,7 +239,7 @@
                     type="button"
                     class="btn btn-danger js-delete"
                     data-pk="{{ l.pk }}"
-                    data-resumo="{{ l.data }} · {{ l.get_tipo_display }} · {{ l.categoria }} · {{ l.descricao }} · R$ {{ l.valor|localize }}"
+                    data-resumo="{{ l.data }} · {{ l.get_tipo_display }} · {{ l.categoria }} · {{ l.pessoa }} · {{ l.descricao }} · R$ {{ l.valor|localize }}"
                   >
                     Excluir
                   </button>
@@ -245,7 +247,7 @@
               </tr>
             {% empty %}
               <tr>
-                <td colspan="7">Nenhuma transação cadastrada ainda.</td>
+                <td colspan="8">Nenhuma transação cadastrada ainda.</td>
               </tr>
             {% endfor %}
           </tbody>
