@@ -163,10 +163,11 @@
       <div class="card">
         <form method="post" novalidate>
           {% csrf_token %}
-          <label for="{{ form.nome.id_for_label }}">Nome da categoria</label>
-          {{ form.nome }}
-          {{ form.nome.errors }}
-          {{ form.non_field_errors }}
+          <input type="hidden" name="form_type" value="categoria" />
+          <label for="{{ categoria_form.nome.id_for_label }}">Nome da categoria</label>
+          {{ categoria_form.nome }}
+          {{ categoria_form.nome.errors }}
+          {{ categoria_form.non_field_errors }}
 
           <div class="actions">
             <button type="submit">Salvar categoria</button>
@@ -199,6 +200,52 @@
             {% empty %}
               <tr>
                 <td colspan="3" class="muted">Nenhuma categoria cadastrada ainda.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="pessoa" />
+          <label for="{{ pessoa_form.nome.id_for_label }}">Nome da pessoa</label>
+          {{ pessoa_form.nome }}
+          {{ pessoa_form.nome.errors }}
+          {{ pessoa_form.non_field_errors }}
+
+          <div class="actions">
+            <button type="submit">Salvar pessoa</button>
+            <span class="muted">As pessoas cadastradas podem ser usadas nas próximas etapas do app.</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Criado em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pessoas %}
+              <tr>
+                <td>{{ p.nome }}</td>
+                <td class="muted">{{ p.criado_em }}</td>
+                <td>
+                  <form method="post" action="{% url 'financas:excluir_pessoa' p.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="3" class="muted">Nenhuma pessoa cadastrada ainda.</td>
               </tr>
             {% endfor %}
           </tbody>

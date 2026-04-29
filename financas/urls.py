@@ -13,6 +13,11 @@ urlpatterns = [
         views.excluir_categoria_view,
         name="excluir_categoria",
     ),
+    path(
+        "administrativo/pessoas/excluir/<int:pk>/",
+        views.excluir_pessoa_view,
+        name="excluir_pessoa",
+    ),
     path("historico/", views.historico_view, name="historico"),
     path(
         "historico/excluir/<int:pk>/",

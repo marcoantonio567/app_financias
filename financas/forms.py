@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 
-from financas.models import Categoria, Lancamento
+from financas.models import Categoria, Lancamento, Pessoa
 
 
 class LancamentoForm(forms.ModelForm):
@@ -42,6 +42,20 @@ class CategoriaForm(forms.ModelForm):
         widgets = {
             "nome": forms.TextInput(
                 attrs={"class": "field", "placeholder": "Ex.: Alimentação, Transporte"}
+            ),
+        }
+
+
+class PessoaForm(forms.ModelForm):
+    class Meta:
+        model = Pessoa
+        fields = ["nome"]
+        labels = {
+            "nome": "Nome da pessoa",
+        }
+        widgets = {
+            "nome": forms.TextInput(
+                attrs={"class": "field", "placeholder": "Ex.: João, Maria"}
             ),
         }
 

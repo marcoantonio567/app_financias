@@ -13,6 +13,17 @@ class Categoria(models.Model):
         return self.nome
 
 
+class Pessoa(models.Model):
+    nome = models.CharField(max_length=120, unique=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["nome"]
+
+    def __str__(self) -> str:
+        return self.nome
+
+
 class Lancamento(models.Model):
     class Tipo(models.TextChoices):
         ENTRADA = "E", "Entrada"
