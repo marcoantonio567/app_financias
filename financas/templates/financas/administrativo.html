@@ -54,6 +54,7 @@
         align-items: baseline;
         justify-content: space-between;
         gap: 12px;
+        flex-wrap: wrap;
       }
       .tabs {
         display: flex;
@@ -137,6 +138,24 @@
       }
       .message-error {
         border-color: color-mix(in srgb, #b00020 42%, transparent);
+      }
+      @media (max-width: 560px) {
+        body {
+          padding: 14px;
+        }
+        .card {
+          padding: 14px;
+        }
+        .topbar {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .tabs {
+          justify-content: flex-start;
+        }
+        table {
+          min-width: 520px;
+        }
       }
     </style>
   </head>
