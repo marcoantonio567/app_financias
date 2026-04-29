@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 
-from financas.models import Lancamento
+from financas.models import Categoria, Lancamento
 
 
 class LancamentoForm(forms.ModelForm):
@@ -29,6 +29,20 @@ class LancamentoForm(forms.ModelForm):
                 }
             ),
             "data": forms.DateInput(attrs={"class": "field", "type": "date"}),
+        }
+
+
+class CategoriaForm(forms.ModelForm):
+    class Meta:
+        model = Categoria
+        fields = ["nome"]
+        labels = {
+            "nome": "Nome da categoria",
+        }
+        widgets = {
+            "nome": forms.TextInput(
+                attrs={"class": "field", "placeholder": "Ex.: Alimentação, Transporte"}
+            ),
         }
 
 

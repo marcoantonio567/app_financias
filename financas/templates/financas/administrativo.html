@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Administrativo</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 0;
+        padding: 24px;
+        background: Canvas;
+        color: CanvasText;
+      }
+      .container {
+        max-width: 920px;
+        margin: 0 auto;
+        display: grid;
+        gap: 16px;
+      }
+      .card {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 16px;
+        background: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      a {
+        color: inherit;
+      }
+      label {
+        font-size: 12px;
+        display: block;
+        margin-bottom: 6px;
+        opacity: 0.85;
+      }
+      .field {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: Canvas;
+        color: CanvasText;
+      }
+      .topbar {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .tab {
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        background: color-mix(in srgb, CanvasText 6%, Canvas);
+      }
+      .tab-active {
+        background: color-mix(in srgb, CanvasText 14%, Canvas);
+        font-weight: 600;
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: space-between;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+      button,
+      .btn {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+        background: color-mix(in srgb, CanvasText 10%, Canvas);
+        color: CanvasText;
+        cursor: pointer;
+      }
+      .btn-danger {
+        border-color: color-mix(in srgb, #b00020 42%, transparent);
+        background: color-mix(in srgb, #b00020 12%, Canvas);
+      }
+      .errorlist {
+        margin: 8px 0 0 0;
+        padding: 0;
+        list-style: none;
+        color: #b00020;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+        vertical-align: top;
+      }
+      th {
+        font-size: 12px;
+        opacity: 0.85;
+        font-weight: 600;
+      }
+      .muted {
+        opacity: 0.85;
+        font-size: 12px;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      .messages {
+        display: grid;
+        gap: 10px;
+      }
+      .message {
+        border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: Canvas;
+      }
+      .message-success {
+        border-color: color-mix(in srgb, #1b7f3a 42%, transparent);
+      }
+      .message-error {
+        border-color: color-mix(in srgb, #b00020 42%, transparent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="topbar">
+        <h1>Administrativo</h1>
+        <div class="tabs">
+          <a class="tab" href="/">Cadastro</a>
+          <a class="tab tab-active" href="/administrativo/">Administrativo</a>
+          <a class="tab" href="/historico/">Histórico</a>
+          <a class="tab" href="/dashboard/">Dashboards</a>
+        </div>
+      </div>
+
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="message message-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="card">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <label for="{{ form.nome.id_for_label }}">Nome da categoria</label>
+          {{ form.nome }}
+          {{ form.nome.errors }}
+          {{ form.non_field_errors }}
+
+          <div class="actions">
+            <button type="submit">Salvar categoria</button>
+            <span class="muted">As categorias abaixo aparecem no cadastro administrativo.</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="card table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Criado em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in categorias %}
+              <tr>
+                <td>{{ c.nome }}</td>
+                <td class="muted">{{ c.criado_em }}</td>
+                <td>
+                  <form method="post" action="{% url 'financas:excluir_categoria' c.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="3" class="muted">Nenhuma categoria cadastrada ainda.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

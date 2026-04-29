@@ -13,8 +13,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from financas.forms import LancamentoForm, PinForm
-from financas.models import Lancamento
+from financas.forms import CategoriaForm, LancamentoForm, PinForm
+from financas.models import Categoria, Lancamento
 
 
 def _pin_redirect(request):
@@ -198,6 +198,42 @@ def historico_view(request):
             "page_obj": page_obj,
         },
     )
+
+
+def administrativo_view(request):
+    if not request.session.get("pin_ok"):
+        return _pin_redirect(request)
+
+    if request.method == "POST":
+        form = CategoriaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Categoria cadastrada com sucesso.")
+            return redirect("financas:administrativo")
+    else:
+        form = CategoriaForm()
+
+    categorias = Categoria.objects.all()
+
+    return render(
+        request,
+        "financas/administrativo.html",
+        {
+            "form": form,
+            "categorias": categorias,
+        },
+    )
+
+
+@require_POST
+def excluir_categoria_view(request, pk: int):
+    if not request.session.get("pin_ok"):
+        return _pin_redirect(request)
+
+    categoria = get_object_or_404(Categoria, pk=pk)
+    categoria.delete()
+    messages.success(request, "Categoria excluída com sucesso.")
+    return redirect("financas:administrativo")
 
 
 @require_POST

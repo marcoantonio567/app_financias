@@ -2,6 +2,17 @@ from django.db import models
 from django.utils import timezone
 
 
+class Categoria(models.Model):
+    nome = models.CharField(max_length=80, unique=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["nome"]
+
+    def __str__(self) -> str:
+        return self.nome
+
+
 class Lancamento(models.Model):
     class Tipo(models.TextChoices):
         ENTRADA = "E", "Entrada"
