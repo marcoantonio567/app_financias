@@ -221,14 +221,19 @@
               {{ form.tipo.errors }}
             </div>
             <div class="row">
-              <label for="{{ form.data.id_for_label }}">Data</label>
-              {{ form.data }}
-              {{ form.data.errors }}
+              <label for="{{ form.categoria.id_for_label }}">Categoria</label>
+              {{ form.categoria }}
+              {{ form.categoria.errors }}
             </div>
             <div class="row" style="grid-column: 1 / -1">
               <label for="{{ form.descricao.id_for_label }}">Descrição</label>
               {{ form.descricao }}
               {{ form.descricao.errors }}
+            </div>
+            <div class="row">
+              <label for="{{ form.data.id_for_label }}">Data</label>
+              {{ form.data }}
+              {{ form.data.errors }}
             </div>
             <div class="row">
               <label for="{{ form.valor.id_for_label }}">Valor</label>
@@ -252,6 +257,7 @@
             <tr>
               <th>Data</th>
               <th>Tipo</th>
+              <th>Categoria</th>
               <th>Descrição</th>
               <th>Valor</th>
             </tr>
@@ -261,12 +267,13 @@
               <tr>
                 <td>{{ l.data }}</td>
                 <td>{{ l.get_tipo_display }}</td>
+                <td>{{ l.categoria }}</td>
                 <td>{{ l.descricao }}</td>
                 <td>R$ {{ l.valor|localize }}</td>
               </tr>
             {% empty %}
               <tr>
-                <td colspan="4">Nenhum lançamento cadastrado ainda.</td>
+                <td colspan="5">Nenhum lançamento cadastrado ainda.</td>
               </tr>
             {% endfor %}
           </tbody>

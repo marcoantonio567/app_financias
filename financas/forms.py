@@ -5,17 +5,24 @@ from financas.models import Categoria, Lancamento, Pessoa
 
 
 class LancamentoForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "categoria" in self.fields:
+            self.fields["categoria"].queryset = Categoria.objects.all().order_by("nome")
+
     class Meta:
         model = Lancamento
-        fields = ["tipo", "descricao", "valor", "data"]
+        fields = ["tipo", "categoria", "descricao", "valor", "data"]
         labels = {
             "tipo": "Tipo",
+            "categoria": "Categoria",
             "descricao": "Descrição",
             "valor": "Valor (R$)",
             "data": "Data",
         }
         widgets = {
             "tipo": forms.Select(attrs={"class": "field"}),
+            "categoria": forms.Select(attrs={"class": "field"}),
             "descricao": forms.TextInput(
                 attrs={"class": "field", "placeholder": "Ex.: Salário, Aluguel"}
             ),

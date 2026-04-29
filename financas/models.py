@@ -30,6 +30,9 @@ class Lancamento(models.Model):
         SAIDA = "S", "Saída"
 
     tipo = models.CharField(max_length=1, choices=Tipo.choices)
+    categoria = models.ForeignKey(
+        Categoria, on_delete=models.PROTECT, related_name="lancamentos"
+    )
     descricao = models.CharField(max_length=255)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
     data = models.DateField(default=timezone.localdate)

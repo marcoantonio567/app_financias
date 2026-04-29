@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from urllib.parse import urlencode
 
+from django.db.models.deletion import ProtectedError
 from django.db.models import DecimalField, Sum, Value
 from django.db.models.functions import Coalesce
 from django.contrib import messages
@@ -58,7 +59,7 @@ def lancamentos_view(request):
     total_saidas = total_saidas.quantize(Decimal("0.01"))
     saldo = (total_entradas - total_saidas).quantize(Decimal("0.01"))
 
-    ultimos = Lancamento.objects.all()[:20]
+    ultimos = Lancamento.objects.select_related("categoria").all()[:20]
 
     return render(
         request,
@@ -186,7 +187,7 @@ def historico_view(request):
     if not request.session.get("pin_ok"):
         return _pin_redirect(request)
 
-    qs = Lancamento.objects.all()
+    qs = Lancamento.objects.select_related("categoria").all()
     paginator = Paginator(qs, 25)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -242,8 +243,13 @@ def excluir_categoria_view(request, pk: int):
         return _pin_redirect(request)
 
     categoria = get_object_or_404(Categoria, pk=pk)
-    categoria.delete()
-    messages.success(request, "Categoria excluída com sucesso.")
+    try:
+        categoria.delete()
+        messages.success(request, "Categoria excluída com sucesso.")
+    except ProtectedError:
+        messages.error(
+            request, "Não foi possível excluir: existe lançamento associado a esta categoria."
+        )
     return redirect("financas:administrativo")
 
 
