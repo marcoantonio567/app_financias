@@ -1,111 +1,115 @@
-# Financeiro App
+# Financial App
 
-Aplicacao web de controle financeiro pessoal feita com Django.
+Personal financial control web application built with Django.
 
-O projeto permite cadastrar entradas e saidas, acompanhar historico paginado e visualizar dashboards com metricas dos ultimos 30 dias (ou por mes selecionado).
+The project allows you to register income and expenses, track paginated history, and view dashboards with metrics for the last 30 days (or by selected month).
 
-## Funcionalidades
+## Features
 
-- Cadastro de lancamentos financeiros (entrada e saida).
-- Calculo automatico de totais de entradas, saidas e saldo.
-- Listagem dos 20 ultimos lancamentos na tela principal.
-- Historico completo com paginacao.
-- Dashboard com graficos (Chart.js) e filtro por mes.
-- Protecao de acesso por senha PIN de 6 digitos (sessao).
+- Registration of financial transactions (income and expenses).
 
-## Tecnologias
+- Automatic calculation of total income, expenses, and balance.
+
+- Listing of the last 20 transactions on the main screen.
+
+- Complete history with pagination.
+
+- Dashboard with graphs (Chart.js) and filter by month.
+
+- Access protection via 6-digit PIN password (session).
+
+## Technologies
 
 - Python 3.12+
 - Django 6.0.4
-- SQLite (banco padrao do Django)
+- SQLite (Django's default database)
 - HTML + CSS + JavaScript
 - Chart.js (via CDN)
 
-## Estrutura do Projeto
+## Project Structure
 
-```text
-financeiro_app/
-|-- core/                   # Configuracoes do projeto Django
-|-- financas/               # App principal
-|   |-- migrations/
-|   |-- templates/financas/
-|   |-- forms.py
-|   |-- models.py
-|   |-- urls.py
-|   `-- views.py
+```text.financeiro_app/
+|-- core/ # Django project configurations
+|-- financas/ # Main app
+| |-- migrations/
+| |-- templates/financas/
+| |-- forms.py
+| |-- models.py
+| |-- urls.py
+| `-- views.py
 |-- manage.py
 `-- README.md
 ```
 
-## Como Executar
+## How to Run
 
-1. Clone ou baixe este repositorio.
-2. Entre na pasta do projeto:
+1. Clone or download this repository.
+
+2. Enter the project folder:
 
 ```bash
 cd financeiro_app
 ```
 
-1. Crie e ative um ambiente virtual.
+1. Create and activate a virtual environment.
 
 Windows (PowerShell):
 
 ```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
+python -m venv .venv .venv\Scripts\Activate.ps1
+
 ```
 
 Linux/macOS:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv .venv source .venv/bin/activate
 ```
 
-1. Instale as dependencias:
+1. Install the dependencies:
 
 ```bash
 pip install "Django==6.0.4"
 ```
 
-1. Rode as migracoes:
+2. Run the migrations:
 
 ```bash
 python manage.py migrate
 ```
 
-1. Inicie o servidor:
+3. Start the server:
 
 ```bash
 python manage.py runserver
 ```
 
-1. Acesse no navegador:
+4. Access in the browser:
 
 ```text
 http://127.0.0.1:8000/
 ```
 
-## Rotas Principais
+## Main Routes
 
-- `/` ou `/lancamentos/` -> cadastro e resumo de lancamentos
-- `/historico/` -> historico paginado
-- `/dashboard/` -> graficos e indicadores
-- `/senha/` -> validacao do PIN
-- `/admin/` -> painel administrativo do Django
+- `/` or `/lancamentos/` -> registration and summary of transactions
+- `/history/` -> paginated history
+- `/dashboard/` -> graphs and indicators
+- `/password/` -> PIN validation
+- `/admin/` -> Django admin panel
 
-## Modelo de Dados
+## Data Model
 
-O app possui o modelo `Lancamento` com os campos:
+The app has the `Transaction` model with the following fields:
 
-- `tipo` (`E` para Entrada, `S` para Saida)
-- `descricao`
-- `valor`
-- `data`
-- `criado_em`
+- `type` (`E` for Entry, `S` for Exit)
+- `description`
+- `value`
+- `date`
+- `created_on`
 
-## Melhorias Futuras (Sugestoes)
+## Future Improvements (Suggestions)
 
-- Incluir autenticacao de usuario (login Django).
-- Criar testes automatizados para views e formularios.
+- Include user authentication (Django login).
 
+- Create automated tests for views and forms.
