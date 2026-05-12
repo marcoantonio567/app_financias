@@ -86,15 +86,6 @@ python manage.py runserver
 http://127.0.0.1:8000/
 ```
 
-## PIN de Acesso
-
-O app exige uma senha numerica de 6 digitos para liberar as telas.
-
-- Chave usada: `FINANCEIRO_APP_PIN` em `core/settings.py`
-- Valor atual no projeto: `162636`
-
-Para alterar, edite o arquivo `core/settings.py` e mude o valor da constante.
-
 ## Rotas Principais
 
 - `/` ou `/lancamentos/` -> cadastro e resumo de lancamentos
